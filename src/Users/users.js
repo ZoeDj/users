@@ -1,18 +1,24 @@
 import React, { Component } from "react";
 import User from "./user";
+import UniqueId from "react-html-id";
 
 class Users extends Component {
-  state = {
-    users: [
-      { name: "John", age: 51 },
-      { name: "Nick", age: 43 },
-      { name: "Mark", age: 37 },
-      { name: "Vince", age: 34 },
-      { name: "Bob", age: 42 },
-      { name: "Brian", age: 57 }
-    ],
-    title: "Users List"
-  };
+  constructor() {
+    super();
+    UniqueId.enableUniqueIds(this);
+
+    this.state = {
+      users: [
+        { id: this.nextUniqueId(), name: "John", age: 51 },
+        { id: this.nextUniqueId(), name: "Nick", age: 43 },
+        { id: this.nextUniqueId(), name: "Mark", age: 37 },
+        { id: this.nextUniqueId(), name: "Vince", age: 34 },
+        { id: this.nextUniqueId(), name: "Bob", age: 42 },
+        { id: this.nextUniqueId(), name: "Brian", age: 57 }
+      ],
+      title: "Users List"
+    };
+  }
 
   makeMeYounger = () => {
     const newState = this.state.users.map(user => {
@@ -25,17 +31,44 @@ class Users extends Component {
     });
   };
 
+  deleteUser = (index, e) => {
+    const users = Object.assign([], this.state.users);
+    users.splice(index, 1);
+    this.setState({ users: users });
+  };
+
+  changeUserName = (id, e) => {
+    const index = this.state.users.findIndex(user => {
+      return user.id === id;
+    });
+
+    const user = Object.assign({}, this.state.users[index]);
+    user.name = e.target.value;
+
+    const users = Object.assign([], this.state.users);
+    users[index] = user;
+
+    this.setState({ users: users });
+  };
+
   render() {
     return (
       <div>
-        <button onClick={this.makeMeYounger}>Make us 10 years younger</button>
+        <button onClick={this.makeMeYounger}>Time Machine</button>
         <br />
         <h1>{this.state.title}</h1>
-        {this.state.users.map(user => (
-          <User key={user.name} age={user.age}>
-            {user.name}
-          </User>
-        ))}
+        <ul>
+          {this.state.users.map((user, index) => (
+            <User
+              key={user.id}
+              age={user.age}
+              changeEvent={this.changeUserName.bind(this, user.id)}
+              deleteEvent={this.deleteUser.bind(this, index)}
+            >
+              {user.name}
+            </User>
+          ))}
+        </ul>
       </div>
     );
   }
